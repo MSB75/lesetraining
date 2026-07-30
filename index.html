@@ -1,0 +1,1218 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#2457c5">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Lesetraining">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="format-detection" content="telephone=no">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512.png">
+  <link rel="icon" type="image/png" href="icons/favicon.png">
+  <title>Lesetraining – Niveau 1 bis 5</title>
+  <style>
+    :root {
+      --bg: #bfe4ff;
+      --surface: #ffffff;
+      --text: #07152f;
+      --muted: #30415f;
+      --primary: #064fc4;
+      --primary-dark: #00347f;
+      --accent: #ff8a00;
+      --accent-dark: #b84f00;
+      --correct: #08783f;
+      --wrong: #b00020;
+      --focus: #ffd400;
+      --border: #315b91;
+      --shadow: 0 12px 30px rgba(35, 55, 90, .13);
+      --radius: 22px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { font-size: 18px; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      min-height: 100dvh;
+      font-family: "Chalkboard SE", "Comic Sans MS", "Marker Felt", ui-rounded, system-ui, -apple-system, sans-serif;
+      color: var(--text);
+      background: linear-gradient(145deg, #69c6ff 0%, #bcecff 42%, #fff0a6 100%);
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    button, input { font: inherit; }
+
+    button {
+      min-height: 54px;
+      border: 0;
+      border-radius: 16px;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+
+    button:focus-visible {
+      outline: 5px solid var(--focus);
+      outline-offset: 3px;
+    }
+
+    .app-shell {
+      width: min(1100px, 100%);
+      min-height: 100dvh;
+      margin: 0 auto;
+      padding: max(18px, env(safe-area-inset-top)) max(18px, env(safe-area-inset-right)) max(24px, env(safe-area-inset-bottom)) max(18px, env(safe-area-inset-left));
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-weight: 900;
+      font-size: clamp(1.4rem, 3vw, 2rem);
+    }
+
+    .logo {
+      display: block;
+      width: 76px;
+      height: 76px;
+      border-radius: 21px;
+      object-fit: cover;
+      border: 3px solid #ffffff;
+      box-shadow: 0 6px 0 #06377f, 0 10px 22px rgba(7,21,47,.28);
+    }
+
+    .splash-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(145deg, #064fc4, #30b9ff 58%, #ffd83d);
+      transition: opacity .28s ease, visibility .28s ease;
+    }
+    .splash-screen.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+    .splash-card { text-align:center; color:#fff; font-weight:900; font-size:clamp(1.8rem,6vw,3rem); text-shadow:0 3px 0 #00347f; }
+    .splash-logo { width:min(52vw,260px); aspect-ratio:1; border-radius:28%; display:block; margin:0 auto 18px; border:6px solid #fff; box-shadow:0 12px 35px rgba(0,0,0,.28); }
+
+    .icon-button {
+      width: 56px;
+      min-width: 56px;
+      padding: 0;
+      border: 2px solid var(--border);
+      background: #ffffff;
+      color: #003f9e;
+      font-size: 1.35rem;
+      font-weight: 900;
+      box-shadow: 0 6px 18px rgba(35, 55, 90, .09);
+    }
+
+    .screen { display: none; }
+    .screen.active { display: block; }
+
+    .panel {
+      background: rgba(255,255,255,.98);
+      border: 3px solid #163f73;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: clamp(20px, 4vw, 38px);
+    }
+
+    .hero {
+      text-align: center;
+      padding-block: clamp(26px, 6vw, 64px);
+    }
+
+    h1, h2, h3 { margin-top: 0; }
+    h1 { font-size: clamp(2rem, 5vw, 3.4rem); margin-bottom: 12px; }
+    h2 { font-size: clamp(1.55rem, 3.8vw, 2.35rem); }
+
+    .lead {
+      max-width: 760px;
+      margin: 0 auto 28px;
+      color: var(--muted);
+      line-height: 1.55;
+      font-size: clamp(1rem, 2.3vw, 1.25rem);
+    }
+
+    .stars {
+      letter-spacing: .1em;
+      color: #e5a400;
+      font-size: 1.5rem;
+      margin-bottom: 8px;
+    }
+
+    .menu-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+      margin-top: 28px;
+    }
+
+    .menu-card {
+      min-height: 190px;
+      padding: 24px;
+      text-align: left;
+      background: var(--surface);
+      border: 3px solid transparent;
+      box-shadow: 0 8px 24px rgba(35,55,90,.1);
+      transition: transform .15s ease, border-color .15s ease;
+    }
+
+    .menu-card:hover { transform: translateY(-2px); border-color: #99b5ff; }
+    .menu-card strong { display: block; font-size: 1.35rem; margin-bottom: 10px; }
+    .menu-card span { display: block; color: var(--muted); line-height: 1.45; }
+
+    .exercise-head {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .back-button, .primary-button, .secondary-button {
+      padding: 14px 22px;
+      font-weight: 800;
+    }
+
+    .back-button, .secondary-button {
+      color: var(--text);
+      background: #edf4ff;
+      border: 3px solid var(--border);
+    }
+
+    .back-button,
+    #levelBackButton {
+      color: #ffffff;
+      background: var(--accent);
+      border: 4px solid #7a3300;
+      box-shadow: 0 7px 0 #7a3300, 0 12px 24px rgba(63,31,0,.28);
+      font-size: 2rem;
+      font-weight: 1000;
+      line-height: 1;
+    }
+
+    .back-button:hover,
+    #levelBackButton:hover { background: #ff9f2f; transform:scale(1.05); }
+
+    .back-button:active,
+    #levelBackButton:active { transform: translateY(4px); box-shadow: 0 3px 0 #7a3300; }
+
+    .primary-button {
+      color: #fff;
+      background: var(--primary);
+      box-shadow: 0 8px 18px rgba(36,87,197,.25);
+    }
+
+    .primary-button:hover { background: var(--primary-dark); }
+    .primary-button:disabled { opacity: .45; cursor: not-allowed; }
+
+    .progress-wrap { min-width: 0; }
+    .progress-label { display: flex; justify-content: space-between; gap: 12px; color: var(--muted); margin-bottom: 7px; font-weight: 700; }
+    .progress-track { height: 16px; background: #e5eaf2; border-radius: 999px; overflow: hidden; }
+    .progress-bar { height: 100%; width: 0; background: var(--primary); transition: width .25s ease; }
+
+    .task-area { text-align: center; }
+    .instruction { font-size: clamp(1.2rem, 3vw, 1.7rem); font-weight: 800; margin-bottom: 24px; }
+
+    .image-frame {
+      width: min(320px, 72vw);
+      aspect-ratio: 1;
+      margin: 0 auto 28px;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      border-radius: 28px;
+      background: #f8fafc;
+      border: 4px solid #dfe6f2;
+    }
+
+    .image-frame img { width: 100%; height: 100%; object-fit: contain; padding: 14px; }
+    .fallback-image { font-size: clamp(4rem, 18vw, 8rem); }
+
+    .answers {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .answer-button {
+      min-height: 96px;
+      padding: 18px;
+      border: 3px solid var(--border);
+      background: var(--surface);
+      font-weight: 900;
+      font-size: clamp(1.5rem, 5vw, 2.5rem);
+      color: var(--text);
+    }
+
+    .answer-button:hover { border-color: #7d9ee9; }
+    .answer-button.correct { background: #e7f6ee; border-color: var(--correct); color: var(--correct); }
+    .answer-button.wrong { background: #fff0ee; border-color: var(--wrong); color: var(--wrong); }
+
+    .feedback {
+      min-height: 40px;
+      margin: 20px 0 4px;
+      font-size: 1.3rem;
+      font-weight: 900;
+    }
+
+    .matching-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 22px;
+    }
+
+    .match-image, .match-answer {
+      border: 3px solid var(--border);
+      border-radius: 18px;
+      background: var(--surface);
+    }
+
+    .match-image {
+      padding: 10px;
+      aspect-ratio: 1;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+    }
+
+    .match-image img { width: 100%; height: 100%; object-fit: contain; }
+    .match-image.selected { border-color: var(--primary); box-shadow: 0 0 0 5px rgba(36,87,197,.15); }
+    .match-image.matched, .match-answer.matched { border-color: var(--correct); background: #e7f6ee; }
+    .match-answer { min-height: 82px; padding: 12px; font-size: 1.45rem; font-weight: 900; }
+
+    .level-section { margin-top: 32px; text-align: left; }
+    .level-section h2 { margin-bottom: 12px; }
+    .syllable-blue { color: #1557b0; }
+    .syllable-red { color: #c62828; }
+    .word-option { font-size: clamp(1.25rem, 3.6vw, 2rem); }
+    .error-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 12px; }
+    .error-choice { min-height: 66px; padding: 10px; border: 3px solid var(--border); background: white; font-weight: 800; font-size: 1.15rem; }
+    .error-choice.selected { border-color: var(--primary); background: #e9f0ff; }
+    .error-choice.correct { border-color: var(--correct); background: #e7f6ee; color: var(--correct); }
+    .error-choice.wrong { border-color: var(--wrong); background: #fff0ee; color: var(--wrong); }
+    .confirm-row { margin-top: 18px; display: flex; justify-content: center; }
+    .syllable-prompt { display: flex; justify-content: center; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 24px; font-size: clamp(2rem, 7vw, 3.4rem); font-weight: 900; }
+
+    .result-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0,1fr));
+      gap: 16px;
+      margin: 26px 0;
+    }
+
+    .result-card { padding: 20px; border-radius: 18px; background: #f1f5fb; text-align: center; }
+    .result-card strong { display: block; font-size: 2rem; margin-bottom: 6px; }
+    .result-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 14px; }
+
+    dialog {
+      width: min(760px, calc(100% - 28px));
+      max-height: min(88dvh, 900px);
+      overflow: auto;
+      border: 0;
+      border-radius: 22px;
+      padding: 0;
+      box-shadow: 0 24px 80px rgba(0,0,0,.28);
+    }
+    dialog::backdrop { background: rgba(15,23,42,.5); }
+    .dialog-content { padding: 28px; line-height: 1.55; }
+    .dialog-content h3 { margin: 1.35em 0 .4em; font-size: 1.2rem; }
+    .dialog-content p { margin: .45em 0; }
+    .dialog-content a { color: #003f9e; font-weight: 800; text-decoration-thickness: 2px; }
+    .dialog-actions { display: flex; justify-content: flex-end; margin-top: 22px; }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0,0,0,0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    @media (max-width: 760px) {
+      html { font-size: 16px; }
+      .menu-grid { grid-template-columns: 1fr; }
+      .exercise-head { grid-template-columns: auto 1fr; }
+      .exercise-head .score-mini { grid-column: 1 / -1; text-align: center; }
+      .answers { grid-template-columns: 1fr; }
+      .answer-button { min-height: 76px; }
+      .matching-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .error-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+      .result-grid { grid-template-columns: 1fr; }
+    }
+
+
+    .compact-panel {
+      min-height: calc(100dvh - 112px);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      text-align: center;
+      overflow: hidden;
+    }
+    .compact-panel h1 { margin-bottom: clamp(18px, 4vh, 34px); }
+    .level-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: clamp(10px, 2vw, 18px);
+    }
+    .level-card {
+      min-height: clamp(130px, 24vh, 210px);
+      padding: 14px 8px;
+      background: var(--surface);
+      border: 3px solid var(--border);
+      box-shadow: 0 8px 20px rgba(35,55,90,.1);
+      display: grid;
+      place-content: center;
+      gap: 10px;
+    }
+    .level-card strong { font-size: clamp(2rem, 5vw, 3.8rem); }
+    .level-stars { color:#e5a400; font-size:clamp(.8rem,1.7vw,1.3rem); white-space:nowrap; }
+    .compact-head { display:grid; grid-template-columns:60px 1fr 60px; align-items:center; margin-bottom:24px; }
+    .compact-head h1 { margin:0; }
+    .compact-head .stars { margin:0 0 4px; }
+    .task-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:clamp(14px,2vw,22px); }
+    .task-card {
+      min-height: clamp(220px, 32vh, 300px);
+      padding: clamp(14px,2vw,22px);
+      background: linear-gradient(180deg,#ffffff 0%,#f2f8ff 100%);
+      border: 4px solid var(--border);
+      box-shadow: 0 9px 0 rgba(21,63,112,.20), 0 15px 28px rgba(21,63,112,.15);
+      display:grid;
+      place-content:center;
+      gap:12px;
+      font-weight:900;
+      transition: transform .14s ease, box-shadow .14s ease, border-color .14s ease;
+    }
+    .task-card:hover { transform: translateY(-3px); border-color:var(--primary); }
+    .task-card:active { transform:translateY(5px) scale(.985); box-shadow:0 3px 0 rgba(21,63,112,.25); }
+    .task-card .task-icon {
+      width: clamp(138px, 18vw, 190px);
+      height: clamp(138px, 18vw, 190px);
+      margin: 0 auto;
+      border-radius: 28px;
+      object-fit: cover;
+      border: 4px solid #123b72;
+      box-shadow: 0 7px 0 rgba(18,59,114,.25), 0 12px 20px rgba(18,59,114,.14);
+      background: #fff;
+    }
+    .task-card .task-icon-fallback {
+      width:clamp(138px,18vw,190px); height:clamp(138px,18vw,190px);
+      margin:0 auto; border-radius:28px; border:4px dashed #315b91;
+      display:grid; place-items:center; background:#eef6ff; font-size:4rem;
+    }
+    .task-card strong { font-size:clamp(1.2rem,2.5vw,1.7rem); line-height:1.1; }
+    .brand-home {
+      border: 0;
+      background: transparent;
+      padding: 0;
+      color: inherit;
+      cursor: pointer;
+      border-radius: 18px;
+    }
+    .brand-home:focus-visible { outline: 5px solid #ff8a00; outline-offset: 5px; }
+    .brand-home:hover .logo { transform: scale(1.06); }
+    .brand-home .logo { transition: transform .15s ease; }
+    @media (max-width: 760px) {
+      .level-grid { grid-template-columns:repeat(3,minmax(0,1fr)); }
+      .level-card { min-height:120px; }
+    }
+    @media (max-height: 720px) and (orientation: landscape) {
+      .app-shell { padding-top:10px; padding-bottom:10px; }
+      .topbar { margin-bottom:8px; }
+      .logo { width:62px; height:62px; border-radius:17px; }
+      .compact-panel { min-height:calc(100dvh - 84px); padding:16px 22px; }
+      .level-card { min-height:110px; }
+      .task-card { min-height:190px; padding:10px; }
+      .task-card .task-icon,.task-card .task-icon-fallback { width:132px; height:132px; }
+      .compact-panel h1 { margin-bottom:14px; }
+    }
+
+
+    /* Vollbild-Layout: Navigation und Übungen bleiben innerhalb des sichtbaren Fensters. */
+    html, body {
+      width: 100%;
+      height: 100%;
+      height: 100dvh;
+      overflow: hidden;
+      overscroll-behavior: none;
+    }
+
+    body { position: fixed; inset: 0; }
+
+    .app-shell {
+      height: 100dvh;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      padding-top: max(8px, env(safe-area-inset-top));
+      padding-bottom: max(8px, env(safe-area-inset-bottom));
+    }
+
+    .topbar {
+      flex: 0 0 auto;
+      min-height: clamp(58px, 9dvh, 86px);
+      margin-bottom: clamp(7px, 1.2dvh, 14px);
+    }
+
+    .screen { min-height: 0; }
+    .screen.active {
+      display: flex;
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    .screen > .panel {
+      width: 100%;
+      height: 100%;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    .compact-panel {
+      min-height: 0;
+      height: 100%;
+      padding: clamp(12px, 2.3dvh, 26px) clamp(14px, 2.5vw, 30px);
+    }
+
+    .compact-panel h1 {
+      font-size: clamp(1.65rem, 4.2dvh, 2.8rem);
+      margin-bottom: clamp(10px, 2dvh, 22px);
+    }
+
+    .level-grid {
+      width: 100%;
+      flex: 1 1 auto;
+      min-height: 0;
+      align-items: stretch;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: clamp(8px, 1.4vw, 16px);
+    }
+
+    .level-card {
+      min-height: 0;
+      height: 100%;
+      max-height: 260px;
+      padding: clamp(8px, 1.7dvh, 18px) 6px;
+    }
+
+    .level-card strong { font-size: clamp(2rem, 7dvh, 4rem); }
+    .level-stars { font-size: clamp(.72rem, 1.8vw, 1.25rem); }
+
+    .compact-head {
+      flex: 0 0 auto;
+      margin-bottom: clamp(8px, 1.5dvh, 16px);
+      min-height: clamp(54px, 8dvh, 76px);
+    }
+
+    .task-grid {
+      flex: 1 1 auto;
+      min-height: 0;
+      height: 100%;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-auto-rows: minmax(0, 1fr);
+      gap: clamp(9px, 1.4vw, 16px);
+    }
+
+    .task-card {
+      min-height: 0;
+      height: 100%;
+      padding: clamp(8px, 1.2dvh, 14px);
+      gap: clamp(5px, .9dvh, 10px);
+    }
+
+    .task-card .task-icon,
+    .task-card .task-icon-fallback {
+      width: min(19vw, 21dvh, 170px);
+      height: min(19vw, 21dvh, 170px);
+      min-width: 92px;
+      min-height: 92px;
+      border-radius: clamp(18px, 2.5dvh, 26px);
+    }
+
+    .task-card strong { font-size: clamp(1rem, 2.5dvh, 1.5rem); }
+
+    #exerciseScreen .panel {
+      display: flex;
+      flex-direction: column;
+      padding: clamp(10px, 1.8dvh, 20px) clamp(12px, 2.2vw, 26px);
+    }
+
+    .exercise-head {
+      flex: 0 0 auto;
+      margin-bottom: clamp(7px, 1.2dvh, 14px);
+      gap: clamp(8px, 1.4vw, 16px);
+    }
+
+    .back-button {
+      min-height: clamp(48px, 7dvh, 64px);
+      padding: 8px 16px;
+      font-size: clamp(1.45rem, 3.7dvh, 2rem);
+    }
+
+    .progress-track { height: clamp(10px, 1.8dvh, 16px); }
+    .progress-label { margin-bottom: 4px; font-size: clamp(.82rem, 2.2dvh, 1rem); }
+    .score-mini { font-size: clamp(.9rem, 2.5dvh, 1.15rem); }
+
+    .task-area {
+      flex: 1 1 auto;
+      min-height: 0;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .instruction {
+      flex: 0 0 auto;
+      font-size: clamp(1rem, 3dvh, 1.45rem);
+      margin: 0 0 clamp(6px, 1.2dvh, 12px);
+    }
+
+    .image-frame {
+      flex: 0 1 auto;
+      width: min(27vw, 30dvh, 245px);
+      max-height: 30dvh;
+      margin: 0 auto clamp(7px, 1.3dvh, 14px);
+      border-radius: clamp(16px, 2.8dvh, 26px);
+    }
+
+    .image-frame img { padding: clamp(6px, 1.2dvh, 12px); }
+
+    .answers {
+      flex: 0 0 auto;
+      gap: clamp(7px, 1.1vw, 13px);
+    }
+
+    .answer-button {
+      min-height: clamp(54px, 8.5dvh, 82px);
+      padding: clamp(7px, 1.3dvh, 14px);
+      font-size: clamp(1.15rem, 4dvh, 2rem);
+    }
+
+    .feedback {
+      flex: 0 0 auto;
+      min-height: clamp(25px, 4.4dvh, 38px);
+      margin: clamp(5px, 1dvh, 10px) 0 0;
+      font-size: clamp(.9rem, 2.6dvh, 1.2rem);
+    }
+
+    .matching-grid {
+      min-height: 0;
+      gap: clamp(5px, .8vw, 10px);
+      margin-bottom: clamp(5px, .9dvh, 10px);
+    }
+
+    .match-image { min-height: 0; padding: clamp(3px, .7dvh, 7px); }
+    .match-answer {
+      min-height: clamp(46px, 7dvh, 66px);
+      padding: 6px;
+      font-size: clamp(.9rem, 2.8dvh, 1.3rem);
+    }
+
+    .error-grid {
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: clamp(4px, .7vw, 8px);
+    }
+
+    .error-choice {
+      min-height: clamp(38px, 6.2dvh, 58px);
+      padding: 4px;
+      font-size: clamp(.72rem, 2.2dvh, 1rem);
+    }
+
+    .confirm-row { margin-top: clamp(5px, 1dvh, 10px); }
+    .confirm-row .primary-button { min-height: 44px; padding: 8px 18px; }
+    .syllable-prompt {
+      margin-bottom: clamp(6px, 1.2dvh, 12px);
+      font-size: clamp(1.7rem, 6dvh, 3rem);
+    }
+
+    #exerciseScreen[data-mode="findErrors"] .image-frame {
+      width: min(18vw, 17dvh, 145px);
+      max-height: 17dvh;
+      margin-bottom: 5px;
+    }
+
+    #exerciseScreen[data-mode="findErrors"] .instruction { margin-bottom: 4px; }
+    #exerciseScreen[data-mode="wordMatching"] .instruction,
+    #exerciseScreen[data-mode="matching"] .instruction { margin-bottom: 5px; }
+
+    #resultScreen .hero {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: clamp(12px, 2.5dvh, 30px);
+    }
+
+    #resultScreen h2 { margin-bottom: 6px; }
+    #resultScreen .lead { margin-bottom: clamp(8px, 1.5dvh, 16px); }
+    .result-grid { margin: clamp(8px, 1.6dvh, 18px) 0; }
+    .result-card { padding: clamp(8px, 1.7dvh, 16px); }
+
+    /* Nur der lange Infodialog darf innerhalb seines eigenen Fensters scrollen. */
+    dialog { overscroll-behavior: contain; }
+
+    @media (max-width: 760px) {
+      .app-shell { padding-inline: max(8px, env(safe-area-inset-left)); }
+      .topbar { min-height: 56px; }
+      .logo { width: 54px; height: 54px; border-radius: 15px; }
+      .brand { gap: 9px; font-size: clamp(1.15rem, 5vw, 1.55rem); }
+      .icon-button { width: 48px; min-width: 48px; min-height: 48px; }
+      .level-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-rows: repeat(2, minmax(0,1fr)); }
+      .level-card { max-height: none; }
+      .task-card .task-icon, .task-card .task-icon-fallback { min-width: 72px; min-height: 72px; }
+      .answers { grid-template-columns: repeat(3, minmax(0,1fr)); }
+      .exercise-head { grid-template-columns: auto 1fr auto; }
+      .exercise-head .score-mini { grid-column: auto; }
+      .result-grid { grid-template-columns: repeat(3, minmax(0,1fr)); }
+      .error-grid { grid-template-columns: repeat(3, minmax(0,1fr)); }
+    }
+
+    @media (max-height: 620px) and (orientation: landscape) {
+      .app-shell { padding-top: 5px; padding-bottom: 5px; }
+      .topbar { min-height: 48px; margin-bottom: 5px; }
+      .logo { width: 48px; height: 48px; border-radius: 13px; }
+      .icon-button { width: 46px; min-width: 46px; min-height: 46px; }
+      .compact-panel { padding-block: 8px; }
+      .task-card .task-icon, .task-card .task-icon-fallback { width: min(16vw, 18dvh, 120px); height: min(16vw, 18dvh, 120px); }
+      .image-frame { width: min(21vw, 25dvh, 180px); max-height: 25dvh; }
+      .answer-button { min-height: 48px; }
+    }
+
+    @media print {
+      body { background: white; }
+      .topbar, #homeScreen, #levelScreen, #exerciseScreen, .result-actions { display: none !important; }
+      #resultScreen { display: block !important; }
+      .panel { box-shadow: none; border: 0; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; animation: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="splash-screen" id="splashScreen" aria-hidden="true"><div class="splash-card"><img class="splash-logo" src="icons/app-logo.png" alt=""><div>Lesetraining</div></div></div>
+  <main class="app-shell">
+    <header class="topbar">
+      <button class="brand brand-home" id="homeLogoButton" type="button" aria-label="Zur Startseite">
+        <img class="logo" src="icons/app-logo.png" alt="">
+        <span>Lesetraining</span>
+      </button>
+      <button class="icon-button" id="infoButton" aria-label="Informationen öffnen">ⓘ</button>
+    </header>
+
+    <section id="homeScreen" class="screen active" aria-labelledby="homeTitle">
+      <div class="panel compact-panel">
+        <h1 id="homeTitle">Wähle dein Niveau</h1>
+        <div class="level-grid" aria-label="Niveaustufen">
+          <button class="level-card" data-choose-level="1"><span class="level-stars">★</span><strong>1</strong></button>
+          <button class="level-card" data-choose-level="2"><span class="level-stars">★★</span><strong>2</strong></button>
+          <button class="level-card" data-choose-level="3"><span class="level-stars">★★★</span><strong>3</strong></button>
+          <button class="level-card" data-choose-level="4"><span class="level-stars">★★★★</span><strong>4</strong></button>
+          <button class="level-card" data-choose-level="5"><span class="level-stars">★★★★★</span><strong>5</strong></button>
+        </div>
+      </div>
+    </section>
+
+    <section id="levelScreen" class="screen" aria-labelledby="levelTitle">
+      <div class="panel compact-panel">
+        <div class="compact-head">
+          <button class="icon-button" id="levelBackButton" aria-label="Zurück zur Niveauauswahl">⬅</button>
+          <div><div class="stars" id="levelStars">★</div><h1 id="levelTitle">Niveau 1</h1></div>
+          <span aria-hidden="true"></span>
+        </div>
+        <div class="task-grid" id="taskMenu"></div>
+      </div>
+    </section>
+
+    <section id="exerciseScreen" class="screen" aria-labelledby="exerciseTitle">
+      <div class="panel">
+        <div class="exercise-head">
+          <button class="back-button" id="backButton" aria-label="Zurück zur Aufgabenauswahl">⬅</button>
+          <div class="progress-wrap">
+            <div class="progress-label"><span id="exerciseTitle">Übung</span><span id="progressText">1 / 10</span></div>
+            <div class="progress-track" aria-hidden="true"><div class="progress-bar" id="progressBar"></div></div>
+          </div>
+          <div class="score-mini" id="scoreMini" aria-live="polite">✓ 0</div>
+        </div>
+        <div id="taskContainer" class="task-area"></div>
+      </div>
+    </section>
+
+    <section id="resultScreen" class="screen" aria-labelledby="resultTitle">
+      <div class="panel hero">
+        <div class="stars" id="resultStars">★</div>
+        <h2 id="resultTitle">Geschafft!</h2>
+        <p class="lead" id="resultSubtitle"></p>
+        <div class="result-grid">
+          <div class="result-card"><strong id="resultCorrect">0</strong><span>richtig</span></div>
+          <div class="result-card"><strong id="resultWrong">0</strong><span>Fehler</span></div>
+          <div class="result-card"><strong id="resultTime">0:00</strong><span>Zeit</span></div>
+        </div>
+        <div class="result-actions">
+          <button class="primary-button" id="printButton">🖨 PDF</button>
+          <button class="secondary-button" id="shareButton">↗ Teilen</button>
+          <button class="secondary-button" id="restartButton">⌂ Start</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <dialog id="infoDialog" aria-labelledby="infoTitle">
+    <div class="dialog-content">
+      <h2 id="infoTitle">🔒 Datenschutz &amp; Impressum</h2>
+
+      <h3>🗄️ Datenspeicherung</h3>
+      <p>Diese App speichert keine persönlichen Daten. Es werden keine Namen, Standorte, Nutzungsverhalten oder sonstige Informationen gespeichert oder übertragen.</p>
+      <p>Die App läuft vollständig im Browser des Geräts. Alle Inhalte (Schriften, Audio, Programmcode) sind direkt in der App-Datei eingebettet. Eine Internetverbindung ist nach dem ersten Laden nicht erforderlich.</p>
+
+      <h3>☁️ Hosting &amp; Server</h3>
+      <p>Die App wird über GitHub Pages (GitHub Inc., 88 Colin P. Kelly Jr. Street, San Francisco, CA 94107, USA) bereitgestellt. Beim ersten Abruf der App-Seite speichert GitHub automatisch Server-Logs mit IP-Adresse, Zeitstempel und Browser-Typ. Diese Logs werden von GitHub verwaltet und sind nicht durch den Betreiber dieser App einsehbar oder beeinflussbar. Rechtsgrundlage: Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse am sicheren Betrieb).</p>
+      <p><strong>Offline-Nutzung:</strong> Nach dem ersten Aufruf speichert der Browser die App lokal (Service Worker / Cache). Danach werden keinerlei Serverzugriffe mehr durchgeführt — auch keine Logs.</p>
+      <p>Datenschutzerklärung von GitHub: <a href="https://docs.github.com/privacy" target="_blank" rel="noopener noreferrer">docs.github.com/privacy</a></p>
+
+      <h3>🖼️ Bildmaterial &amp; Urheberrecht</h3>
+      <p>Die in dieser App verwendeten Piktogramme stammen von ARASAAC (Aragonese Portal of Augmentative and Alternative Communication):</p>
+      <p><strong>Urheber:</strong> Sergio Palao<br>
+      <strong>Eigentümer:</strong> Gobierno de Aragón (Regierung von Aragonien), Spanien<br>
+      <strong>Quelle:</strong> <a href="https://arasaac.org" target="_blank" rel="noopener noreferrer">arasaac.org</a><br>
+      <strong>Lizenz:</strong> CC BY-NC-SA 4.0<br>
+      Creative Commons Namensnennung – Nicht-kommerziell – Weitergabe unter gleichen Bedingungen 4.0 International<br>
+      <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noopener noreferrer">creativecommons.org/licenses/by-nc-sa/4.0</a></p>
+      <p>Die Nutzung dieser App und ihrer Inhalte ist ausschließlich für nicht-kommerzielle Zwecke (Bildung, Förderung) gestattet.</p>
+
+      <h3>📞 Kontakt</h3>
+      <p>Bei Fragen oder Anmerkungen erreichst du den App-Entwickler über folgende Website:<br>
+      <a href="https://msb75.github.io/digitale_helfer/#kontakt" target="_blank" rel="noopener noreferrer">msb75.github.io/digitale_helfer/#kontakt</a></p>
+
+      <div class="dialog-actions"><button class="primary-button" id="closeInfoButton">✓ Schließen</button></div>
+    </div>
+  </dialog>
+
+  <script>
+    "use strict";
+
+    const LEVEL1 = [
+      ["Biene",["Ba","Be","Bie"],"Bie","biene.png","🐝"],
+      ["Käfer",["Ku","Kä","Ka"],"Kä","kaefer.png","🐞"],
+      ["Apfel",["Am","Ap","Al"],"Ap","apfel.png","🍎"],
+      ["Ananas",["An","As","Al"],"An","ananas.png","🍍"],
+      ["Löwe",["Lo","Lü","Lö"],"Lö","loewe.png","🦁"],
+      ["Kiwi",["Ke","Ki","Kü"],"Ki","kiwi.png","🥝"],
+      ["Tee",["Tei","Teu","Tee"],"Tee","tee.png","🍵"],
+      ["Ei",["Eu","En","Ei"],"Ei","ei.png","🥚"],
+      ["Nuss",["Nu","Na","Ne"],"Nu","nuss.png","🌰"],
+      ["Dusche",["Du","Da","De"],"Du","dusche.png","🚿"],
+      ["Pizza",["Pez","Paz","Piz"],"Piz","pizza.png","🍕"],
+      ["Pommes",["Pum","Pom","Pam"],"Pom","pommes.png","🍟"],
+      ["Schokolade",["Scha","Schu","Scho"],"Scho","schokolade.png","🍫"],
+      ["Brot",["Bro","Bar","Bru"],"Bro","brot.png","🍞"],
+      ["Waffel",["Wa","Wu","Wo"],"Wa","waffel.png","🧇"],
+      ["Arm",["Au","Ar","An"],"Ar","arm.png","💪"],
+      ["Nase",["Na","Nu","No"],"Na","nase.png","👃"],
+      ["Käse",["Kö","Kä","Kü"],"Kä","kaese.png","🧀"],
+      ["Koch",["Kach","Koch","Kauch"],"Koch","koch.png","👨‍🍳"],
+      ["Müllauto",["Mu","Mä","Mü"],"Mü","muellauto.png","🚛"],
+      ["Reifen",["Rau","Re","Rei"],"Rei","reifen.png","⭕"],
+      ["Burg",["Be","Bu","Bo"],"Bu","burg.png","🏰"],
+      ["Haus",["Hei","Heu","Hau"],"Hau","haus.png","🏠"],
+      ["Turm",["To","Tau","Tu"],"Tu","turm.png","🗼"],
+      ["Fluss",["Flo","Fla","Flu"],"Flu","fluss.png","🌊"],
+      ["Oase",["O","A","E"],"O","oase.png","🏝️"],
+      ["Blume",["Blo","Blu","Bla"],"Blu","blume.png","🌼"],
+      ["Pirat",["Pe","Pa","Pi"],"Pi","pirat.png","🏴‍☠️"],
+      ["Rucksack",["Ra","Re","Ru"],"Ru","rucksack.png","🎒"],
+      ["Planet",["Ple","Pla","Plo"],"Pla","planet.png","🪐"],
+      ["Einhorn",["Eun","En","Ein"],"Ein","einhorn.png","🦄"],
+      ["Faust",["Fi","Fu","Fau"],"Fau","faust.png","✊"],
+      ["Ritter",["Ri","Re","Ra"],"Ri","ritter.png","🛡️"],
+      ["Hut",["Ho","Hu","Ha"],"Hu","hut.png","🎩"],
+      ["Nagel",["Ne","Na","Nu"],"Na","nagel.png","🔩"],
+      ["Haken",["He","Hu","Ha"],"Ha","haken.png","🪝"],
+      ["Dach",["Da","Do","Du"],"Da","dach.png","🏠"],
+      ["Löffel",["Lu","Lä","Lö"],"Lö","loeffel.png","🥄"],
+      ["Schaukel",["Schu","Schau","Scheu"],"Schau","schaukel.png","🛝"],
+      ["Treppe",["Tru","Tra","Tre"],"Tre","treppe.png","🪜"],
+      ["Mauer",["Mu","Mau","Ma"],"Mau","mauer.png","🧱"],
+      ["Trommel",["Tru","Tro","Tre"],"Tro","trommel.png","🥁"],
+      ["Flöte",["Flü","Flä","Flö"],"Flö","floete.png","🪈"],
+      ["Schublade",["Schu","Scha","Scho"],"Schu","schublade.png","🗄️"],
+      ["Kegel",["Ka","Ke","Ko"],"Ke","kegel.png","🎳"],
+      ["Sofa",["So","Su","Sa"],"So","sofa.png","🛋️"],
+      ["Föhn",["Fü","Fö","Fä"],"Fö","foehn.png","💨"],
+      ["Sack",["Se","Su","Sa"],"Sa","sack.png","🎒"],
+      ["Eimer",["Eu","Au","Ei"],"Ei","eimer.png","🪣"],
+      ["Besen",["Bi","Bu","Be"],"Be","besen.png","🧹"],
+      ["Tisch",["Ti","Te","Tu"],"Ti","tisch.png","🪑"],
+      ["Gürtel",["Gu","Gü","Ga"],"Gü","guertel.png","🥋"],
+      ["Bügeleisen",["Bä","Bö","Bü"],"Bü","buegeleisen.png","♨️"],
+      ["Schaufel",["Schu","Scheu","Schau"],"Schau","schaufel.png","⛏️"],
+      ["Zange",["Ze","Zu","Za"],"Za","zange.png","🗜️"],
+      ["Herd",["Ha","Hu","He"],"He","herd.png","🔥"],
+      ["Schraube",["Schru","Schrau","Schre"],"Schrau","schraube.png","🔩"],
+      ["Koffer",["Ku","Ka","Ko"],"Ko","koffer.png","🧳"],
+      ["Limo",["Li","Lu","Le"],"Li","limo.png","🥤"],
+      ["Nest",["Nu","Ne","Na"],"Ne","nest.png","🪺"],
+      ["Puppe",["Pi","Pa","Pu"],"Pu","puppe.png","🪆"],
+      ["Feder",["Fi","Fo","Fe"],"Fe","feder.png","🪶"],
+      ["Euro",["Au","Eu","Ei"],"Eu","euro.png","💶"],
+      ["Bauch",["Beu","Bu","Bau"],"Bau","bauch.png","🧍"],
+      ["Tür",["Tu","Tö","Tü"],"Tü","tuer.png","🚪"],
+      ["Küche",["Kü","Kö","Kä"],"Kü","kueche.png","🍳"],
+      ["Euter",["Ei","Au","Eu"],"Eu","euter.png","🐄"]
+    ].map(([word,options,correct,file,emoji])=>({word,options,correct,file,emoji}));
+
+    const LEVEL2 = [
+      ["Auto",["An to","A tou","Au to"],"Au to","auto.png","🚗"],
+      ["baden",["bo den","bu den","ba den"],"ba den","baden.png","🛁"],
+      ["Auge",["Eu ge","Au ge","Au be"],"Au ge","auge.png","👁️"],
+      ["Eis",["Eis","Eim","Eus"],"Eis","eis.png","🍨"],
+      ["Ball",["Bull","Baff","Ball"],"Ball","ball.png","⚽"],
+      ["Bein",["Beun","Bein","Baun"],"Bein","bein.png","🦵"],
+      ["Baum",["Beim","Beum","Baum"],"Baum","baum.png","🌳"],
+      ["Bus",["Bus","Bos","Bas"],"Bus","bus.png","🚌"],
+      ["Buch",["Bach","Boch","Buch"],"Buch","buch.png","📘"],
+      ["Boot",["Baat","But","Boot","Beit"],"Boot","boot.png","⛵"],
+      ["Bett",["Beff","Batt","Bett","Bitt"],"Bett","bett.png","🛏️"],
+      ["Dino",["Do no","Di no","Do ni"],"Di no","dino.png","🦕"],
+      ["Ente",["En ta","En fe","En te"],"En te","ente.png","🦆"],
+      ["Fisch",["Fesch","Fisch","Fusch","Fich"],"Fisch","fisch.png","🐟"],
+      ["Fuß",["Faß","Foß","Fuß","Fauß"],"Fuß","fuss.png","🦶"],
+      ["Fass",["Fuss","Fauss","Fass"],"Fass","fass.png","🛢️"],
+      ["Glas",["Glos","Glus","Glas"],"Glas","glas.png","🥛"],
+      ["Hase",["Ho se","Hu sa","Ha se"],"Ha se","hase.png","🐇"],
+      ["Heu",["Hei","Heu","Hu"],"Heu","heu.png","🌾"],
+      ["Haus",["Heus","Hauf","Haus","Hausch"],"Haus","haus.png","🏠"],
+      ["Hose",["Ho se","Ha se","Hu se","He se"],"Ho se","hose.png","👖"],
+      ["Gras",["Gas","Gras","Greis"],"Gras","gras.png","🌱"],
+      ["Iglu",["Ig lu","Ig la","Ig lo"],"Ig lu","iglu.png","🧊"],
+      ["Kamm",["Kann","Kumm","Kamm"],"Kamm","kamm.png","🪮"],
+      ["Hut",["Hot","Hut","Huf"],"Hut","hut.png","🎩"],
+      ["Klo",["Klu","Kla","Klo","Kle"],"Klo","klo.png","🚽"],
+      ["Lama",["Lo ma","La ma","La mo","Lo mo"],"La ma","lama.png","🦙"],
+      ["Maus",["Meus","Mäus","Maus"],"Maus","maus.png","🐭"],
+      ["Mais",["Mist","Mast","Mais"],"Mais","mais.png","🌽"],
+      ["Mann",["Menn","Monn","Mann"],"Mann","mann.png","👨"],
+      ["Nase",["No se","Na se","Ne se"],"Na se","nase.png","👃"],
+      ["Rose",["Ra se","Ro se","Ru se","Ru sa"],"Ro se","rose.png","🌹"],
+      ["Rad",["Rod","Rad","Rud"],"Rad","rad.png","🚲"],
+      ["Schaf",["Schaf","Schof","Schuf"],"Schaf","schaf.png","🐑"],
+      ["Salat",["Sa lot","Sa lat","So lot"],"Sa lat","salat.png","🥗"],
+      ["Schal",["Schul","Schal","Schol"],"Schal","schal.png","🧣"],
+      ["Teich",["Teuch","Tich","Teich","Tach"],"Teich","teich.png","🏞️"],
+      ["Bär",["Bar","Bör","Bär","Bor"],"Bär","baer.png","🐻"],
+      ["Eule",["Ei le","Eu le","Au le"],"Eu le","eule.png","🦉"],
+      ["Hai",["Heu","Hai","Hie"],"Hai","hai.png","🦈"],
+      ["Tor",["Tar","Tur","Tor"],"Tor","tor.png","🥅"],
+      ["Tisch",["Tesch","Tisch","Tasch"],"Tisch","tisch.png","🪑"],
+      ["Wal",["Wul","Waul","Wal","Wol"],"Wal","wal.png","🐋"],
+      ["Tüte",["To te","Tu te","Tü te"],"Tü te","tuete.png","🛍️"],
+      ["Zaun",["Zeun","Zein","Zaun"],"Zaun","zaun.png","🚧"],
+      ["Esel",["E sal","E sel","E sil"],"E sel","esel.png","🫏"],
+      ["Zug",["Zag","Zug","Zog","Züg"],"Zug","zug.png","🚆"],
+      ["Kanu",["Ku na","Ka na","Ka nu"],"Ka nu","kanu.png","🛶"],
+      ["Zwei",["Zwei","Zweu","Zwe"],"Zwei","zwei.png","2️⃣"],
+      ["Drei",["Dreu","Dru","Drei"],"Drei","drei.png","3️⃣"],
+      ["Neun",["Naun","Neun","Nein"],"Neun","neun.png","9️⃣"],
+      ["Eins",["Euns","Eims","Eins","Enis"],"Eins","eins.png","1️⃣"],
+      ["Käse",["Ku se","Kä se","Kä su"],"Kä se","kaese.png","🧀"],
+      ["Kiwi",["Ki mi","Ka wi","Ki wi"],"Ki wi","kiwi.png","🥝"],
+      ["Euro",["Eu no","Eu ro","Ei ro"],"Eu ro","euro.png","💶"],
+      ["Limo",["Lo mi","Li mo","Li mi","Lo mo"],"Li mo","limo.png","🥤"],
+      ["Tür",["Tur","Tär","Tür","Tör"],"Tür","tuer.png","🚪"],
+      ["Seife",["Seu fe","Sei fe","Sau fe"],"Sei fe","seife.png","🧼"],
+      ["Tipi",["At pi","Ti po","Ti pi","To po"],"Ti pi","tipi.png","⛺"],
+      ["Jojo",["Ju jo","Ja ja","Jau jo","Jo jo"],"Jo jo","jojo.png","🪀"]
+    ].map(([word,options,correct,file,emoji])=>({word,options,correct,file,emoji,syllables:correct.split(/\s+/)}));
+
+
+
+    const LEVEL3 = [
+      ["Ampel",["Am pel","Am pil","Am pal"],"Am pel","ampel.png","🚦"],
+      ["Affe",["At te","Af fo","Af fe"],"Af fe","affe.png","🐒"],
+      ["Arm",["Arm","Annr","Ar m"],"Arm","arm.png","💪"],
+      ["Tasche",["Tu sche","Tau sche","Ta sche"],"Ta sche","tasche.png","👜"],
+      ["Delfin",["Del fan","Del fin","Del fun","Dul fen"],"Del fin","delfin.png","🐬"],
+      ["Fünf",["Funf","Fünf","Fänf","Fanf"],"Fünf","fuenf.png","5️⃣"],
+      ["Birne",["Bir ne","Bri ne","Bir me"],"Bir ne","birne.png","🍐"],
+      ["Blüte",["Blö te","Blu te","Blü te"],"Blü te","bluete.png","🌸"],
+      ["Zelt",["Zalt","Zelf","Zelt"],"Zelt","zelt.png","⛺"],
+      ["Brot",["Brit","Brat","Brot"],"Brot","brot.png","🍞"],
+      ["Brett",["Britt","Brett","Breit","Brött"],"Brett","brett.png","🪵"],
+      ["Heft",["Heift","Heft","Huft","Haft"],"Heft","heft.png","📓"],
+      ["Kamel",["Ka mel","Ko mel","Ku mel"],"Ka mel","kamel.png","🐫"],
+      ["Eimer",["Eu mer","Ei ner","Ei mer"],"Ei mer","eimer.png","🪣"],
+      ["baden",["Ba den","ba pen","be ben"],"Ba den","baden.png","🛁"],
+      ["Brief",["Breif","Bref","Brief"],"Brief","brief.png","✉️"],
+      ["Bügel",["Bö gel","Bu gel","Ba gl","Bü gel"],"Bü gel","buegel.png","🧥"],
+      ["Gabel",["Ga bel","Go bel","Ga bal"],"Ga bel","gabel.png","🍴"],
+      ["Frosch",["Frasch","Frösch","Frosch"],"Frosch","frosch.png","🐸"],
+      ["Tiger",["Te ger","Ti ger","Tu ger"],"Ti ger","tiger.png","🐯"],
+      ["Geist",["Geust","Gaust","Geist"],"Geist","geist.png","👻"],
+      ["Geld",["Gald","Gelb","Geld"],"Geld","geld.png","💶"],
+      ["Berg",["Berd","Berm","Berg","Berb"],"Berg","berg.png","⛰️"],
+      ["Hand",["Hund","Hemd","Hamd","Hand"],"Hand","hand.png","✋"],
+      ["Hund",["Hand","Hemd","Hund"],"Hund","hund.png","🐕"],
+      ["Katze",["Kut ze","Kat ze","Kaf fe"],"Kat ze","katze.png","🐈"],
+      ["Insel",["Im sel","In sel","In sal","In sef"],"In sel","insel.png","🏝️"],
+      ["Käfig",["Kä tig","Kä fig","Ka fig","Kö fig"],"Kä fig","kaefig.png","🪺"],
+      ["Kasse",["Kos se","Kas se","Kus se"],"Kas se","kasse.png","💰"],
+      ["Igel",["I del","I gal","I gel"],"I gel","igel.png","🦔"],
+      ["Kissen",["Kes sen","Kis ten","Kis sen"],"Kis sen","kissen.png","🛏️"],
+      ["Kiste",["Kas te","Ke ste","Kos te","Kis te"],"Kis te","kiste.png","📦"],
+      ["Kleid",["Kleud","Klaud","Kleid","Klied"],"Kleid","kleid.png","👗"],
+      ["Kran",["Krun","Kran","Kron"],"Kran","kran.png","🏗️"],
+      ["Korb",["Kurb","Kord","Korb"],"Korb","korb.png","🧺"],
+      ["Stern",["Starn","Stern","Storn"],"Stern","stern.png","⭐"],
+      ["Krone",["Kra ne","Kro ne","Kru ne"],"Kro ne","krone.png","👑"],
+      ["Kuchen",["Ku schen","Ko chen","Ku chen","Kü chen"],"Ku chen","kuchen.png","🍰"],
+      ["Lampe",["Lum pe","Lam pe","Lom pe"],"Lam pe","lampe.png","💡"],
+      ["lesen",["li sen","le sen","lau sen"],"le sen","lesen.png","📖"],
+      ["Leiter",["Leu ter","Lau ter","Lei ter"],"Lei ter","leiter.png","🪜"],
+      ["Löffel",["Lof fel","Lüf fel","Löf fel"],"Löf fel","loeffel.png","🥄"],
+      ["Knopf",["Kopf","Knupf","Knaupf","Knopf"],"Knopf","knopf.png","🔘"],
+      ["Teller",["Tel lur","Tet ter","Tel ler","Tei ler"],"Tel ler","teller.png","🍽️"],
+      ["Messer",["Mas ser","Mes ser","Mus ser"],"Mes ser","messer.png","🔪"],
+      ["Schwein",["Schweun","Schwein","Schwaun"],"Schwein","schwein.png","🐖"],
+      ["Mond",["Mand","Mond","Mund"],"Mond","mond.png","🌙"],
+      ["laufen",["leu fen","lu fen","la fen","lau fen"],"lau fen","laufen.png","🏃"],
+      ["Nest",["Nist","Nast","Nest"],"Nest","nest.png","🪺"],
+      ["Mund",["Mund","Mand","Mond"],"Mund","mund.png","👄"],
+      ["Nacht",["Nucht","Nascht","Nacht"],"Nacht","nacht.png","🌙"],
+      ["Nadel",["Nu del","No del","Na del"],"Na del","nadel.png","🪡"],
+      ["Paket",["Pe kat","Pa ket","Pa kat","Pe ket"],"Pa ket","paket.png","📦"],
+      ["Pilz",["Pelz","Pilz","Pulz","Pifz"],"Pilz","pilz.png","🍄"],
+      ["Pinsel",["Pen sal","Pin sol","Pin sel"],"Pin sel","pinsel.png","🖌️"],
+      ["Schloss",["Schloss","Schlus","Schlass"],"Schloss","schloss.png","🏰"],
+      ["Regen",["Ra gen","Re gen","Rei gen"],"Re gen","regen.png","🌧️"],
+      ["Raupe",["Reu pe","Rau pe","Ran pe","Ram pe"],"Rau pe","raupe.png","🐛"],
+      ["Salz",["Solz","Safz","Aslz","Sulz"],"Salz","salz.png","🧂"],
+      ["Schirm",["Scharm","Scherm","Schirm"],"Schirm","schirm.png","☂️"],
+      ["Wurm",["Warm","Wurm","Worm"],"Wurm","wurm.png","🪱"],
+      ["Roller",["Ral ler","Rot ter","Rol ler"],"Rol ler","roller.png","🛴"],
+      ["Schere",["Scha re","Sche ra","Sche re"],"Sche re","schere.png","✂️"],
+      ["Schiff",["Schaff","Schitt","Schiff","Scheff"],"Schiff","schiff.png","🚢"],
+      ["Schrank",["Schrunk","Schrauk","Schrank","Schronk"],"Schrank","schrank.png","🚪"]
+    ].map(([word,options,correct,file,emoji])=>({word,options,correct,file,emoji,syllables:correct.split(/\s+/)}));
+
+
+    const LEVEL4 = [
+      ["Angel",["Am gel","An gel","Au gel"],"An gel","angel.png","🎣"],
+      ["Brille",["Bril lo","Brel le","Bril le"],"Bril le","brille.png","👓"],
+      ["Flasche",["Flu sche","Flo sche","Fla sche","Flö sche"],"Fla sche","flasche.png","🧴"],
+      ["Filzstift",["Falz steft","Fifz steft","Filz stift","Filz stuft"],"Filz stift","filzstift.png","🖊️"],
+      ["Bürste",["Bors te","Börs te","Bürs te"],"Bürs te","buerste.png","🪥"],
+      ["Brezel",["Bri zel","Bre zal","Bre zel"],"Bre zel","brezel.png","🥨"],
+      ["Daumen",["Deu men","Däu men","Dau men"],"Dau men","daumen.png","👍"],
+      ["Eichel",["Ei chal","Ei chel","Eu chel"],"Ei chel","eichel.png","🌰"],
+      ["Engel",["En gal","En del","En gel","Eu gel"],"En gel","engel.png","👼"],
+      ["Drache",["Do che","De che","Dra sche","Drau che"],"Dra sche","drache.png","🐉"],
+      ["Feuer",["Fei er","Feu er","Fau er"],"Feu er","feuer.png","🔥"],
+      ["Finger",["Fin ger","Fan ger","Fen gr"],"Fin ger","finger.png","☝️"],
+      ["Flugzeug",["Flog zeig","Flug zeug","Flag zug"],"Flug zeug","flugzeug.png","✈️"],
+      ["Eier",["Eu er","Ei er","Ei mer"],"Ei er","eier.png","🥚"],
+      ["Flügel",["Flu gel","Fla gel","Flü gel","Fü gel"],"Flü gel","fluegel.png","🪽"],
+      ["Freunde",["Frein de","Fein de","Freun de"],"Freun de","freunde.png","🧑‍🤝‍🧑"],
+      ["Garten",["Gor ten","Gar ten","Gau ten"],"Gar ten","garten.png","🌻"],
+      ["Hamster",["Hums ter","Homs ter","Hams ter"],"Hams ter","hamster.png","🐹"],
+      ["Kerze",["Ker fe","Kar se","Ker ze"],"Ker ze","kerze.png","🕯️"],
+      ["Achtzehn",["Acht zahn","Ascht zehn","Acht zehn","Echt zehn"],"Acht zehn","achtzehn.png","18"],
+      ["Kirche",["Ker che","Kar che","Kir che","Kir sche"],"Kir che","kirche.png","⛪"],
+      ["Kirschen",["Ker schen","Kir chen","Kir schen"],"Kir schen","kirschen.png","🍒"],
+      ["Koffer",["Kaf fer","Kof fer","Kot ter"],"Kof fer","koffer.png","🧳"],
+      ["König",["Ko nig","Kü nig","Kö nig"],"Kö nig","koenig.png","🤴"],
+      ["Nashorn",["Nos harn","Nas horn","Nas harn","Nus horn"],"Nas horn","nashorn.png","🦏"],
+      ["Ordner",["Ord ner","Ond rer","Om red","Ord red"],"Ord ner","ordner.png","📁"],
+      ["Schlitten",["Schlat ten","Schlit ten","Schlet ten"],"Schlit ten","schlitten.png","🛷"],
+      ["Schlüssel",["Schlüs sel","Schös sel","Schlos sel"],"Schlüs sel","schluessel.png","🔑"],
+      ["Schnabel",["Scnu bel","Schna del","Schna bel"],"Schna bel","schnabel.png","🐦"],
+      ["Wölfe",["Wol fe","Wal fe","Wäl fe","Wöl fe"],"Wöl fe","woelfe.png","🐺"],
+      ["Schneemann",["Schnei mann","Schnee mann","Schee mann"],"Schnee mann","schneemann.png","⛄"],
+      ["schreiben",["scheu ben","schrau ben","schrei ben"],"schrei ben","schreiben.png","✍️"],
+      ["Teppich",["Tap pich","Tep pisch","Tep pich"],"Tep pich","teppich.png","🧶"],
+      ["Zwanzig",["Zwun zig","Zwan zig","Zwon zig"],"Zwan zig","zwanzig.png","20"],
+      ["Trauben",["Tru ben","Tra ben","Treu ben","Trau ben"],"Trau ben","trauben.png","🍇"],
+      ["Würfel",["Wor fel","Würtel","Wür fel","Wär fel"],"Wür fel","wuerfel.png","🎲"],
+      ["Spinne",["Span ne","Spin ne","Spon ne"],"Spin ne","spinne.png","🕷️"],
+      ["Spritze",["Sprat ze","Sprut ze","Sprit ze"],"Sprit ze","spritze.png","💉"],
+      ["Stempel",["Stam pel","Stum pel","Stem pel"],"Stem pel","stempel.png","🔖"],
+      ["Stiefel",["Stie fel","Sta fel","Sto fel"],"Stie fel","stiefel.png","🥾"],
+      ["Schlange",["Schlung ge","Schlau ge","Schle ge","Schöan ge"],"Schlan ge","schlange.png","🐍"],
+      ["Spiegel",["Spie gel","Speu gel","Spar gel","Spei gel"],"Spie gel","spiegel.png","🪞"],
+      ["Zebra",["Ze bra","Ze ba","Ze bru"],"Ze bra","zebra.png","🦓"],
+      ["Zirkus",["Zar kus","Zur kis","Zir kus"],"Zir kus","zirkus.png","🎪"],
+      ["Leuchtturm",["Laucht turm","Leucht turm","Leicht torm"],"Leucht turm","leuchtturm.png","🗼"],
+      ["Handtuch",["Hund tuch","Hand tach","Hand tuch","Hand tusch"],"Hand tuch","handtuch.png","🧻"],
+      ["Bleistift",["Bleu stift","Blau steft","Blei steift","Blei stift"],"Blei stift","bleistift.png","✏️"],
+      ["Monster",["Mans ter","Muns ter","Mons ter"],"Mons ter","monster.png","👾"],
+      ["Torte",["Tur te","Tor te","Tar te"],"Tor te","torte.png","🎂"],
+      ["Dreizehn",["Drei zahn","Dreu zehn","Drei zehn"],"Drei zehn","dreizehn.png","13"],
+      ["Mütze",["Müt ze","Mot ze","Möt ze"],"Müt ze","muetze.png","🧢"],
+      ["rechnen",["resch nen","rich nen","rech nen","reich nen"],"rech nen","rechnen.png","➕"],
+      ["Neunzehn",["Nein zehn","Neun zahn","Nenn zehn","Neun zehn"],"Neun zehn","neunzehn.png","19"],
+      ["Bagger",["Bag ger","Bog ger","Bag gir"],"Bag ger","bagger.png","🚜"],
+      ["Bonbon",["Ban bon","Bun bun","Bon bon"],"Bon bon","bonbon.png","🍬"],
+      ["Erbsen",["Erd sen","Erb sun","Enb sen","Erb sen"],"Erb sen","erbsen.png","🫛"],
+      ["Apfel",["Am pel","Ap tel","Ap fel","Ap fef"],"Ap fel","apfel.png","🍎"],
+      ["Vampir",["Van pir","Vum pur","Vam pir"],"Vam pir","vampir.png","🧛"],
+      ["Vierzehn",["Veir zehn","Vier zehn","Vier zahn"],"Vier zehn","vierzehn.png","14"],
+      ["Gespenst",["Ge speinst","Ge stenst","Ge spenst"],"Ge spenst","gespenst.png","👻"],
+      ["Fabrik",["Fau brik","Fu brik","Fa brik"],"Fa brik","fabrik.png","🏭"],
+      ["Vulkan",["Vol kun","Vul kan","Vul kein","Vul kon"],"Vul kan","vulkan.png","🌋"]
+    ].map(([word,options,correct,file,emoji])=>({word,options,correct,file,emoji,syllables:correct.split(/\s+/)}));
+
+    const LEVEL5 = [["Ameise",["A mei se","A meu se","A mau se"],"A mei se","ameise.png","🐜"],["Ananas",["A na nas","A no nos","A nau nas"],"A na nas","ananas.png","🍍"],["Elefant",["E le fant","E le tant","E le fent"],"E le fant","elefant.png","🐘"],["Giraffe",["Gi raf fe","Gi rof fe","Ge raf fe"],"Gi raf fe","giraffe.png","🦒"],["Banane",["Ba na ne","Bo no ne","Ba no ne","Bo na ne"],"Ba na ne","banane.png","🍌"],["Domino",["Do mi no","Do mo ni","Di mo ni","Di mi ni"],"Do mi no","domino.png","🁫"],["Gitarre",["Gi tar re","Gi tar ri","Gr tar ra"],"Gi tar re","gitarre.png","🎸"],["Kastanie",["Kas ta nie","Kus tu nie","Kas to nie"],"Kas ta nie","kastanie.png","🌰"],["Krokodil",["Kro ko dil","Kru ko dol","Kro ku del"],"Kro ko dil","krokodil.png","🐊"],["Lineal",["Li ne al","Le nu al","Lu ne al","Lo ni al"],"Li ne al","lineal.png","📏"],["Radio",["Ra di o","Ru di o","Ra do o"],"Ra di o","radio.png","📻"],["Papagei",["Pa pa gei","Pa pa geu","Pa po geu"],"Pa pa gei","papagei.png","🦜"],["Regenschirm",["Re gen schirm","Re gen scharm","Ra gen schirm"],"Re gen schirm","regenschirm.png","☂️"],["Motorrad",["Mo tor rad","Ma tor rod","Mo tar rad","Ma tor rud"],"Mo tor rad","motorrad.png","🏍️"],["Rakete",["Ra ke te","Re ka te","Ro ke te","Ru ke te"],"Ra ke te","rakete.png","🚀"],["Regenwurm",["Re gen wurm","Re gen warm","Ra gen wurm"],"Re gen wurm","regenwurm.png","🪱"],["Pinguin",["Pin gu in","Pan gu in","Pen gu an"],"Pin gu in","pinguin.png","🐧"],["Schokolade",["Scho ko la de","Scha ko la de","Schu ku la de"],"Scho ko la de","schokolade.png","🍫"],["Sandale",["San da le","San do le","Sun du le"],"San da le","sandale.png","🩴"],["Paprika",["Pap ri ka","Pa pri ko","Pa pri ku","Pa pro ka"],"Pap ri ka","paprika.png","🫑"],["Telefon",["Te le fon","Te lo fan","Ta le fon","Te la fon"],"Te le fon","telefon.png","☎️"],["Gorilla",["Go ril la","Ga ril la","Go ril lo"],"Go ril la","gorilla.png","🦍"],["Fledermaus",["Fle der maus","Fle der mus","Fla der mus"],"Fle der maus","fledermaus.png","🦇"],["Kartoffel",["Kar tof fel","Kor taf fel","Kar tof fef"],"Kar tof fel","kartoffel.png","🥔"],["Tomate",["To ma te","Tu ma te","To mu te"],"To ma te","tomate.png","🍅"],["Eichhörnchen",["Eich hörn chen","Eich härn chen","Ech hörn chen","Eich harn chen"],"Eich hörn chen","eichhoernchen.png","🐿️"],["Trompete",["Trom pe te","Tram pe te","Trum po te","Traum pe te"],"Trom pe te","trompete.png","🎺"],["Zitrone",["Zi tro ne","Zi tra ne","Zi tro na"],"Zi tro ne","zitrone.png","🍋"],["Zauberer",["Zau be rer","Zeu be rer","Zei be rer"],"Zau be rer","zauberer.png","🧙"],["Libelle",["Li bel le","Lo bel la","Lu bul le"],"Li bel le","libelle.png","🪲"],["Taschenrechner",["Ta schen rech ner","Tu schen reih ner","To schen rich ner","Ta chen reich ner"],"Ta schen rech ner","taschenrechner.png","🧮"],["Känguru",["Kän gu ru","Kän ga ra","Kin ge re"],"Kän gu ru","kaenguru.png","🦘"],["Briefkasten",["Brief kas ten","Breif kus ten","Brief kos ten"],"Brief kas ten","briefkasten.png","📬"],["Dromedar",["Dro me dar","Dra me dur","Drei me der"],"Dro me dar","dromedar.png","🐪"],["Gießkanne",["Gieß kan ne","Geis kan ne","Geus kon ne"],"Gieß kan ne","giesskanne.png","🚿"],["Schildkröte",["Schild krö te","Schald krö te","Schild kru te","Schild krä te"],"Schild krö te","schildkroete.png","🐢"],["Erdbeere",["Erd bee re","Erb dee re","Erd beu re","End bee te"],"Erd bee re","erdbeere.png","🍓"],["Arbeitsblatt",["Ar beits blatt","Ar buts blett","Ar bets blitt"],"Ar beits blatt","arbeitsblatt.png","📄"],["Klebestift",["Kle be stift","Kle be staft","Kla be stift"],"Kle be stift","klebestift.png","🖍️"],["Antenne",["An ten ne","An tun ne","An tan ne","Au ten ne"],"An ten ne","antenne.png","📡"],["Armbanduhr",["Arm band uhr","Arn bond uhr","Arm bund ahr"],"Arm band uhr","armbanduhr.png","⌚"],["Badewanne",["Ba de wan ne","Bo de wan ne","Ba de wun ne"],"Ba de wan ne","badewanne.png","🛁"],["Bügeleisen",["Bü gel ei sen","Bö gel eu sen","Bü del ei sen"],"Bü gel ei sen","buegeleisen.png","♨️"],["Hubschrauber",["Hub schrau ber","Hub schreu ber","Hab schrau ber"],"Hub schrau ber","hubschrauber.png","🚁"],["Vogelscheuche",["Vo gel scheu che","Vo gel schau che","Va gel schei che","Vo gel schei che"],"Vo gel scheu che","vogelscheuche.png","🪹"],["Schmetterling",["Schmet ter ling","Schmit ter ling","Schnef fer ling"],"Schmet ter ling","schmetterling.png","🦋"],["Hamburger",["Ham bur ger","Hom ber ger","Hum bar ger"],"Ham bur ger","hamburger.png","🍔"],["Taschenlampe",["Ta schen lam pe","To schen lom pe","Tu schen lum pe","Tä schen läm pe"],"Ta schen lam pe","taschenlampe.png","🔦"],["Sandkasten",["Sand kas ten","Sund kos ten","Sond kis ten"],"Sand kas ten","sandkasten.png","🏖️"],["Zahnbürste",["Zahn bürs te","Zahn bors te","Zöhn bürs te"],"Zahn bürs te","zahnbuerste.png","🪥"],["Unterhemd",["Un ter hemd","Un fer hemb","Un ter hend","Um ter und"],"Un ter hemd","unterhemd.png","👕"],["Unterhose",["Un ter ho se","Un fer ha se","Un tir hu se"],"Un ter ho se","unterhose.png","🩲"],["Weintrauben",["Wein trau ben","Weun trei ben","Wein treu ben"],"Wein trau ben","weintrauben.png","🍇"],["Lagerfeuer",["La ger feu er","Lu ger fei er","Lo der feu er"],"La ger feu er","lagerfeuer.png","🔥"],["Spinnennetz",["Spin nen netz","Span nin nutz","Stin nen neff","Sin nen metz"],"Spin nen netz","spinnennetz.png","🕸️"],["Zahnpasta",["Zahn pas ta","Zohn pus ta","Zähn pis ta","Zuhn pes to"],"Zahn pas ta","zahnpasta.png","🦷"]].map(([word,options,correct,file,emoji])=>({word,options,correct,file,emoji,syllables:correct.split(/\s+/)}));
+
+    const state={level:1,mode:null,round:0,totalRounds:10,correct:0,wrong:0,startTime:0,current:null,selectedImage:null,pairsMatched:0,locked:false,selectedErrors:new Set()};
+    const $=id=>document.getElementById(id); const screens=[$("homeScreen"),$("levelScreen"),$("exerciseScreen"),$("resultScreen")];
+
+    const TASK_ICONS = Object.freeze({
+      1: Object.freeze([
+        {mode:'single', icon:'wortanfang_hoeren.png', label:'Wortanfang', fallback:'👂'},
+        {mode:'matching', icon:'bild-buchstaben.png', label:'Zuordnung', fallback:'🧩'}
+      ]),
+      2: Object.freeze([
+        {mode:'word', icon:'wort.png', label:'Wort', fallback:'🔎'},
+        {mode:'wordMatching', icon:'bild-wort-zuordnung.png', label:'Zuordnung', fallback:'🧩'},
+        {mode:'findErrors', icon:'finde_fehler.png', label:'Fehler finden', fallback:'❌'},
+        {mode:'ending', icon:'endsilbe.png', label:'Endsilbe', fallback:'🔤'}
+      ]),
+      3: Object.freeze([
+        {mode:'word', icon:'wort.png', label:'Wort', fallback:'🔎'},
+        {mode:'wordMatching', icon:'bild-wort-zuordnung.png', label:'Zuordnung', fallback:'🧩'},
+        {mode:'findErrors', icon:'finde_fehler.png', label:'Fehler finden', fallback:'❌'},
+        {mode:'ending', icon:'endsilbe.png', label:'Endsilbe', fallback:'🔤'}
+      ]),
+      4: Object.freeze([
+        {mode:'word', icon:'wort.png', label:'Wort', fallback:'🔎'},
+        {mode:'wordMatching', icon:'bild-wort-zuordnung.png', label:'Zuordnung', fallback:'🧩'},
+        {mode:'findErrors', icon:'finde_fehler.png', label:'Fehler finden', fallback:'❌'},
+        {mode:'ending', icon:'endsilbe.png', label:'Endsilbe', fallback:'🔤'}
+      ]),
+      5: Object.freeze([
+        {mode:'word', icon:'wort.png', label:'Wort', fallback:'🔎'},
+        {mode:'wordMatching', icon:'bild-wort-zuordnung.png', label:'Zuordnung', fallback:'🧩'},
+        {mode:'multiEnding', icon:'silben.png', label:'Silben', fallback:'🔤'}
+      ])
+    });
+    function openLevel(level){
+      state.level=Number(level);
+      $("levelTitle").textContent=`Niveau ${state.level}`;
+      $("levelStars").textContent='★'.repeat(state.level);
+      const menu=$("taskMenu"); menu.innerHTML='';
+      TASK_ICONS[state.level].forEach(({mode,icon,label,fallback})=>{
+        const b=document.createElement('button');
+        b.className='task-card';
+        b.setAttribute('aria-label',label);
+        const img=document.createElement('img');
+        img.className='task-icon';
+        img.src=`icons/${icon}`;
+        img.alt='';
+        img.setAttribute('aria-hidden','true');
+        img.addEventListener('error',()=>{
+          const replacement=document.createElement('span');
+          replacement.className='task-icon-fallback';
+          replacement.textContent=fallback;
+          replacement.setAttribute('aria-hidden','true');
+          img.replaceWith(replacement);
+        },{once:true});
+        const text=document.createElement('strong');
+        text.textContent=label;
+        b.append(img,text);
+        b.onclick=()=>startExercise(state.level,mode);
+        menu.appendChild(b);
+      });
+      showScreen($("levelScreen"));
+    }
+    function showScreen(target){screens.forEach(s=>s.classList.toggle("active",s===target));}
+    function shuffled(items){const a=[...items];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+    function escapeHtml(v){return String(v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+    function syllableHtml(text){return text.split(/\s+/).map((s,i)=>`<span class="${i%2?'syllable-red':'syllable-blue'}">${escapeHtml(s)}</span>`).join(' ');}
+    function createPicture(item,className="image-frame"){const w=document.createElement("div");w.className=className;const img=document.createElement("img");img.src=`icons/${item.file}`;img.alt=item.word;img.addEventListener("error",()=>{w.innerHTML=`<span class="fallback-image" role="img" aria-label="${escapeHtml(item.word)}">${item.emoji||'🖼️'}</span>`},{once:true});w.appendChild(img);return w;}
+    function modeName(){return ({single:"Aufgabe 1",matching:"Aufgabe 2",word:"Aufgabe 1",wordMatching:"Aufgabe 2",findErrors:"Aufgabe 3",ending:"Aufgabe 4",multiEnding:"Aufgabe 3"})[state.mode];}
+    function activeWordPool(){return state.level===5?LEVEL5:state.level===4?LEVEL4:state.level===3?LEVEL3:LEVEL2;}
+    function startExercise(level,mode){$("exerciseScreen").dataset.mode=mode;Object.assign(state,{level:Number(level),mode,round:0,totalRounds:mode==='findErrors'?15:(mode==='ending'||mode==='multiEnding')?20:10,correct:0,wrong:0,startTime:Date.now(),current:null,selectedImage:null,pairsMatched:0,locked:false,selectedErrors:new Set()});$("exerciseTitle").textContent=`Niveau ${state.level} – ${modeName()}`;showScreen($("exerciseScreen"));nextRound();}
+    function updateProgress(){const shown=Math.min(state.round+1,state.totalRounds);$("progressText").textContent=`${shown} / ${state.totalRounds}`;$("progressBar").style.width=`${state.round/state.totalRounds*100}%`;$("scoreMini").textContent=`✓ ${state.correct}`;}
+    function nextRound(){if(state.round>=state.totalRounds)return finishExercise();state.locked=false;state.selectedImage=null;state.pairsMatched=0;state.selectedErrors=new Set();updateProgress();({single:renderSingle,matching:renderMatching,word:renderWord,wordMatching:renderWordMatching,findErrors:renderFindErrors,ending:renderEnding,multiEnding:renderMultiEnding})[state.mode]();}
+    function feedback(container){const f=document.createElement('div');f.className='feedback';f.id='feedback';f.setAttribute('aria-live','assertive');container.appendChild(f);}
+    function renderSingle(){const item=LEVEL1[Math.floor(Math.random()*LEVEL1.length)];state.current=item;const c=$("taskContainer");c.innerHTML='<p class="instruction">🔤 Wähle den Anfang.</p>';c.appendChild(createPicture(item));const a=document.createElement('div');a.className='answers';shuffled(item.options).forEach(o=>{const b=document.createElement('button');b.className='answer-button';b.textContent=o;b.onclick=()=>checkChoice(o,item.correct,b,a,`${item.word} beginnt mit „${item.correct}“.`);a.appendChild(b)});c.appendChild(a);feedback(c);}
+    function checkChoice(value,correct,button,group,message){if(state.locked)return;state.locked=true;const ok=value===correct;ok?state.correct++:state.wrong++;button.classList.add(ok?'correct':'wrong');[...group.children].find(b=>b.dataset.value===correct||b.textContent.trim()===correct)?.classList.add('correct');[...group.children].forEach(b=>b.disabled=true);$("feedback").textContent=ok?`Richtig! ${message}`:`Fast! Richtig ist „${correct.replace(/\s+/g,' ')}“.`;state.round++;updateProgress();setTimeout(nextRound,1250);}
+    function renderMatching(){renderGenericMatching(LEVEL1,item=>item.correct,false);}
+    function renderWord(){const pool=activeWordPool();const item=pool[Math.floor(Math.random()*pool.length)];state.current=item;const c=$("taskContainer");c.innerHTML='<p class="instruction">👁️ Wähle das Wort.</p>';c.appendChild(createPicture(item));const a=document.createElement('div');a.className='answers';shuffled(item.options).forEach(o=>{const b=document.createElement('button');b.className='answer-button word-option';b.dataset.value=o;b.innerHTML=syllableHtml(o);b.onclick=()=>checkChoice(o,item.correct,b,a,item.word);a.appendChild(b)});c.appendChild(a);feedback(c);}
+    function renderWordMatching(){renderGenericMatching(activeWordPool(),item=>item.correct,true);}
+    function renderGenericMatching(pool,labelFn,syllables){const items=shuffled(pool).slice(0,4);state.current=items;const c=$("taskContainer");c.innerHTML='<p class="instruction">🔗 Bild + Wort</p>';const images=document.createElement('div');images.className='matching-grid';items.forEach(item=>{const card=createPicture(item,'match-image');card.dataset.word=item.word;card.tabIndex=0;card.setAttribute('role','button');const select=()=>{if(card.classList.contains('matched'))return;images.querySelectorAll('.selected').forEach(e=>e.classList.remove('selected'));card.classList.add('selected');state.selectedImage=item};card.onclick=select;card.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();select()}};images.appendChild(card)});c.appendChild(images);const answers=document.createElement('div');answers.className='matching-grid';shuffled(items).forEach(item=>{const b=document.createElement('button');b.className='match-answer';b.dataset.word=item.word;b.innerHTML=syllables?syllableHtml(labelFn(item)):escapeHtml(labelFn(item));b.onclick=()=>checkMatch(item,b,images);answers.appendChild(b)});c.appendChild(answers);feedback(c);}
+    function checkMatch(item,button,images){if(!state.selectedImage||button.classList.contains('matched')){$("feedback").textContent='Wähle zuerst ein Bild aus.';return}const card=[...images.children].find(x=>x.dataset.word===state.selectedImage.word);if(item.word===state.selectedImage.word){button.classList.add('matched');button.disabled=true;card.classList.remove('selected');card.classList.add('matched');state.correct++;state.pairsMatched++;$("feedback").textContent=`Richtig: ${item.word}.`;state.selectedImage=null;if(state.pairsMatched===4){state.round++;updateProgress();setTimeout(nextRound,900)}}else{state.wrong++;card.classList.remove('selected');state.selectedImage=null;$("feedback").textContent='Das passt noch nicht. Versuche es noch einmal.'}$("scoreMini").textContent=`✓ ${state.correct}`;}
+    function oneLetterVariant(word){const letters='abcdefghijklmnopqrstuvwxyzäöü';const chars=[...word];const candidates=chars.map((ch,i)=>({ch,i})).filter(x=>/[a-zäöü]/i.test(x.ch));if(!candidates.length)return word+'x';const pick=candidates[Math.floor(Math.random()*candidates.length)];let repl=letters[Math.floor(Math.random()*letters.length)];if(pick.ch===pick.ch.toUpperCase())repl=repl.toUpperCase();chars[pick.i]=repl===pick.ch?(pick.ch.toLowerCase()==='a'?'e':'a'):repl;return chars.join('');}
+    function renderFindErrors(){const pool=activeWordPool();const item=pool[Math.floor(Math.random()*pool.length)];state.current=item;const displayWord=item.correct;const wrongs=new Set();while(wrongs.size<4){const v=oneLetterVariant(displayWord);if(v!==displayWord)wrongs.add(v)}const entries=shuffled([...Array(11).fill(displayWord),...wrongs]);const c=$("taskContainer");c.innerHTML='<p class="instruction">🔎 Finde 4 Fehler.</p>';c.appendChild(createPicture(item));const grid=document.createElement('div');grid.className='error-grid';entries.forEach((text,index)=>{const b=document.createElement('button');b.className='error-choice';b.innerHTML=state.level>=3?syllableHtml(text):escapeHtml(text);b.dataset.wrong=String(text!==displayWord);b.onclick=()=>{b.classList.toggle('selected');state.selectedErrors.has(index)?state.selectedErrors.delete(index):state.selectedErrors.add(index)};grid.appendChild(b)});c.appendChild(grid);const row=document.createElement('div');row.className='confirm-row';const confirm=document.createElement('button');confirm.className='primary-button';confirm.textContent='✓ Prüfen';confirm.onclick=()=>checkErrors(grid);row.appendChild(confirm);c.appendChild(row);feedback(c);}
+    function checkErrors(grid){if(state.locked)return;state.locked=true;let all=true;[...grid.children].forEach((b,i)=>{const should=b.dataset.wrong==='true', chosen=state.selectedErrors.has(i);if(should===chosen)b.classList.add('correct');else{b.classList.add('wrong');all=false}b.disabled=true});all?state.correct++:state.wrong++;$("feedback").textContent=all?'Richtig! Du hast alle vier Fehler gefunden.':'Schau dir die markierten Wörter noch einmal an.';state.round++;updateProgress();setTimeout(nextRound,1500);}
+    function renderEnding(){const pool=activeWordPool().filter(x=>x.syllables.length===2);const item=pool[Math.floor(Math.random()*pool.length)];state.current=item;const first=item.syllables[0],correct=item.syllables[1];const distractors=shuffled(pool.filter(x=>x!==item).map(x=>x.syllables[1]).filter((x,i,a)=>x!==correct&&a.indexOf(x)===i)).slice(0,2);const c=$("taskContainer");c.innerHTML='<p class="instruction">🧩 Ergänze.</p>';c.appendChild(createPicture(item));const prompt=document.createElement('div');prompt.className='syllable-prompt';prompt.innerHTML=`<span class="syllable-blue">${escapeHtml(first)}</span><span>…</span>`;c.appendChild(prompt);const a=document.createElement('div');a.className='answers';shuffled([correct,...distractors]).forEach(o=>{const b=document.createElement('button');b.className='answer-button';b.dataset.value=o;b.innerHTML=`<span class="syllable-red">${escapeHtml(o)}</span>`;b.onclick=()=>checkChoice(o,correct,b,a,item.word);a.appendChild(b)});c.appendChild(a);feedback(c);}
+    function renderMultiEnding(){
+      const pool=LEVEL5.filter(x=>x.syllables.length>=3);
+      const item=pool[Math.floor(Math.random()*pool.length)]; state.current=item;
+      const c=$("taskContainer"); c.innerHTML='<p class="instruction">🧩 Baue das Wort.</p>'; c.appendChild(createPicture(item));
+      const prompt=document.createElement('div'); prompt.className='syllable-prompt';
+      prompt.innerHTML=`<span class="syllable-blue">${escapeHtml(item.syllables[0])}</span><span id="builtSyllables"></span>`; c.appendChild(prompt);
+      const choices=document.createElement('div'); choices.className='answers'; c.appendChild(choices); feedback(c);
+      let index=1;
+      const showStep=()=>{
+        choices.innerHTML='';
+        const correct=item.syllables[index];
+        const distractors=shuffled(pool.flatMap(x=>x.syllables.slice(1)).filter((x,i,a)=>x!==correct&&a.indexOf(x)===i)).slice(0,2);
+        shuffled([correct,...distractors]).forEach(o=>{
+          const b=document.createElement('button'); b.className='answer-button'; b.dataset.value=o;
+          const cls=index%2?'syllable-red':'syllable-blue'; b.innerHTML=`<span class="${cls}">${escapeHtml(o)}</span>`;
+          b.onclick=()=>{
+            if(o!==correct){state.wrong++; b.classList.add('wrong'); $("feedback").textContent='Diese Silbe passt noch nicht.'; $("scoreMini").textContent=`✓ ${state.correct}`; return;}
+            state.correct++; b.classList.add('correct');
+            const built=$("builtSyllables"); const span=document.createElement('span'); span.className=cls; span.textContent=correct; built.appendChild(span);
+            index++; $("feedback").textContent=index>=item.syllables.length?`Richtig: ${item.word}.`:'Gut! Wähle die nächste Silbe.';
+            if(index>=item.syllables.length){[...choices.children].forEach(x=>x.disabled=true);state.round++;updateProgress();setTimeout(nextRound,1000)}else showStep();
+          }; choices.appendChild(b);
+        });
+      }; showStep();
+    }
+    function elapsedText(){const s=Math.max(0,Math.round((Date.now()-state.startTime)/1000));return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;}
+    function finishExercise(){$("progressBar").style.width='100%';$("resultCorrect").textContent=state.correct;$("resultWrong").textContent=state.wrong;$("resultTime").textContent=elapsedText();$("resultStars").textContent='★'.repeat(state.level);$("resultSubtitle").textContent=`Niveau ${state.level} – ${modeName()} – ${state.totalRounds} Runden beendet.`;showScreen($("resultScreen"));}
+    function resultText(){return ['Lesetraining – Ergebnis',`Niveau: ${state.level}`,`Aufgabe: ${modeName().replace('Aufgabe ','')}`,`Richtig: ${state.correct}`,`Fehler: ${state.wrong}`,`Zeit: ${$("resultTime").textContent}`,`Datum: ${new Date().toLocaleString('de-DE')}`].join('\n');}
+    async function shareResult(){const text=resultText();try{if(navigator.share)await navigator.share({title:'Lesetraining – Ergebnis',text});else if(navigator.clipboard){await navigator.clipboard.writeText(text);alert('Das Ergebnis wurde kopiert.')}else alert(text)}catch(e){if(e.name!=='AbortError')alert('Das Teilen war nicht möglich.')}}
+    document.querySelectorAll('[data-choose-level]').forEach(b=>b.addEventListener('click',()=>openLevel(b.dataset.chooseLevel)));
+    $("levelBackButton").onclick=()=>showScreen($("homeScreen"));
+    $("homeLogoButton").onclick=()=>showScreen($("homeScreen"));
+    $("backButton").onclick=()=>openLevel(state.level);$("restartButton").onclick=()=>showScreen($("homeScreen"));$("printButton").onclick=()=>window.print();$("shareButton").onclick=shareResult;$("infoButton").onclick=()=>$("infoDialog").showModal();$("closeInfoButton").onclick=()=>$("infoDialog").close();
+
+    // PWA: Service Worker registrieren und Startbild ausblenden.
+    window.addEventListener('load',()=>{
+      setTimeout(()=>document.getElementById('splashScreen')?.classList.add('hidden'),450);
+      if('serviceWorker' in navigator){
+        navigator.serviceWorker.register('./service-worker.js').catch(()=>{});
+      }
+    });
+  </script>
+
+</body>
+</html>
