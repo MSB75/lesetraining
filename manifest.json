@@ -1,9 +1,10 @@
 {
+  "id": "./",
   "name": "Lesetraining",
   "short_name": "Lesetraining",
   "description": "Barrierearmes Lesetraining mit fünf Niveaustufen.",
   "lang": "de-DE",
-  "start_url": "./lesetraining.html",
+  "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "landscape",

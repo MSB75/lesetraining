@@ -1,7 +1,7 @@
-const CACHE_NAME = 'lesetraining-v4';
+const CACHE_NAME = 'lesetraining-v6';
 const APP_SHELL = [
   './',
-  './lesetraining.html',
+  './index.html',
   './manifest.json',
   './icons/app-logo.png',
   './icons/apple-touch-icon.png',
@@ -17,26 +17,45 @@ self.addEventListener('install', event => {
 
 self.addEventListener('activate', event => {
   event.waitUntil(
-    caches.keys().then(keys => Promise.all(keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))))
+    caches.keys().then(keys => Promise.all(
+      keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))
+    ))
   );
   self.clients.claim();
 });
 
 self.addEventListener('fetch', event => {
   if (event.request.method !== 'GET') return;
-  const requestUrl = new URL(event.request.url);
-  if (requestUrl.origin !== self.location.origin) return;
 
+  const url = new URL(event.request.url);
+  if (url.origin !== self.location.origin) return;
+
+  // Navigationen immer zuerst aus dem Netz laden. Offline auf index.html zurückfallen.
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request)
+        .then(response => {
+          if (response && response.ok) {
+            const copy = response.clone();
+            caches.open(CACHE_NAME).then(cache => cache.put('./index.html', copy));
+          }
+          return response;
+        })
+        .catch(() => caches.match('./index.html'))
+    );
+    return;
+  }
+
+  // Lokale Bilder und übrige Dateien: Cache zuerst, danach Netz und Cache aktualisieren.
   event.respondWith(
-    caches.match(event.request).then(cached => {
-      const network = fetch(event.request).then(response => {
+    caches.match(event.request).then(cached => cached ||
+      fetch(event.request).then(response => {
         if (response && response.ok) {
           const copy = response.clone();
           caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
         }
         return response;
-      }).catch(() => cached || (event.request.mode === 'navigate' ? caches.match('./lesetraining.html') : undefined));
-      return cached || network;
-    })
+      })
+    )
   );
 });
