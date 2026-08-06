@@ -1,0 +1,14 @@
+Lesetraining – Version 1.0.2
+
+Alle Dateien und den Ordner icons direkt in den von GitHub Pages veröffentlichten Ordner hochladen:
+
+index.html
+manifest.json
+service-worker.js
+icons/
+
+Danach die alte Homescreen-App auf dem iPad vollständig schließen und neu öffnen. Falls weiterhin eine ältere Version erscheint, die Homescreen-App löschen und erneut über Safari hinzufügen.
+
+Wichtig: Die Aufgabenbilder und Aufgaben-Symbole müssen ebenfalls im Ordner icons liegen.
+
+Version 1.0.2: Beim Teilen wird nach dem Schülernamen gefragt. Das übermittelte TXT-Protokoll enthält eine Zusammenfassung sowie alle einzelnen Antworten, Zuordnungsversuche, Fehlerauswahlen und Silbenschritte.
